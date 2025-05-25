@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Chat as PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div id="content">
+        <div class="item">
+            <h3 id="topic1">Topic 1</h3>
+            <p>Question: How to match a regex in JavaScript?</p>
+            <p>Answer: Use <code>pattern.test(string)</code> in JavaScript.</p>
+        </div>
+        <div class="item">
+            <h3 id="topic2">Topic 2</h3>
+            <p>Question: How to export chat as PDF?</p>
+            <p>Answer: Use <code>jsPDF</code> and <code>html2canvas</code> libraries.</p>
+        </div>
+        <!-- Add more items as needed -->
+    </div>
+    <button onclick="exportPDF()">Export as PDF</button>
+
+    <script>
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Table of contents
+            doc.text('Table of Contents', 10, 10);
+            const items = document.querySelectorAll('.item h3');
+            items.forEach((item, index) => {
+                doc.text(item.innerText, 10, 20 + (index * 10));
+                doc.link(10, 20 + (index * 10), 50, 10, { pageNumber: index + 2 });
+            });
+
+            // Add each item to the PDF with page breaks
+            items.forEach((item, index) => {
+                doc.addPage();
+                doc.text(item.innerText, 10, 10);
+                const itemText = item.nextElementSibling.innerText + '\n' + item.nextElementSibling.nextElementSibling.innerText;
+                doc.text(itemText, 10, 20);
+            });
+
+            doc.save('chat.pdf');
+        }
+    </script>
+</body>
+</html>

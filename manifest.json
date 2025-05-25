@@ -1,0 +1,42 @@
+{
+    "manifest_version": 3,
+    "name": "ScrollLess",
+    "version": "0.3",
+    "description": "Hide ChatGPT responses with a click and browse your prompts faster.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+        "matches": ["https://chatgpt.com/*"],
+        "js": ["content.js"],
+        "run_at": "document_end"
+        }
+    ],
+    "externally_connectable": {
+        "matches": [
+            "https://chatgpt.com/*"
+        ]
+    },
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "commands": {
+        "toggleDisplay": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Y",
+                "mac": "Command+Shift+Y"
+            },
+            "description": "Show or hide all chatgpt responses"
+        }
+    },
+    "icons": {
+        "48": "icon-48.png",
+        "128": "icon-128.png"
+    }
+}
