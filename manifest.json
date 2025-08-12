@@ -6,8 +6,10 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "storage"
+        "storage",
+        "tabs"
     ],
+    "host_permissions": ["https://chatgpt.com/*"],
     "background": {
         "service_worker": "background.js"
     },

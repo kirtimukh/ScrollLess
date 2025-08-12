@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScrollLess</title>
 </head>
-<body style="width: 210px">
+<body style="width: 220px">
   <h1>ScrollLess</h1>
-  <p>Click on prompt to toggle response visibility.</br>Use <code>Ctrl+Shift+Y</code> for all responses.</p>
-  <div style="display:flex; justify-content: space-between;">
-    <button id="toggleDisplayButton" style="flex-grow: 1">Show/hide all</button>
-    <span style="width: 3px;"></span>
-    <button id="hideOnLoadButton" style="flex-grow: 1">Hide on load</button>
+  <p>Click on prompt to toggle response visibility.<br>Use <code>Ctrl+Shift+Y</code> for all responses.</p>
+  <div style="display:flex; gap: 4px; flex-wrap: wrap;">
+    <button id="toggleDisplayButton" style="flex: 1 1 48%">Show/hide all</button>
+    <button id="hideOnLoadButton" style="flex: 1 1 48%">Hide on load</button>
+    <button id="exportTxtButton" style="flex: 1 1 48%">Export TXT</button>
+    <button id="exportJsonButton" style="flex: 1 1 48%">Export JSON</button>
   </div>
   <script src="popup.js"></script>
 </body>
