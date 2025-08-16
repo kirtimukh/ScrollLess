@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "ScrollLess",
-    "version": "0.3",
+    "version": "0.4",
     "description": "Hide ChatGPT responses with a click and browse your prompts faster. Extract YouTube transcripts.",
     "permissions": [
         "activeTab",
@@ -49,5 +49,11 @@
     "icons": {
         "48": "icon-48.png",
         "128": "icon-128.png"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["hashtag-nav.css"],
+            "matches": ["https://chatgpt.com/*"]
+        }
+    ]
 }

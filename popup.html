@@ -74,6 +74,88 @@
       background: #ffebee;
       border-radius: 4px;
     }
+    .hashtag-setup {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+    .hashtag-setup h3 {
+      font-size: 13px;
+      margin: 0 0 8px 0;
+      color: #333;
+    }
+    .setup-description {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .setup-note {
+      font-size: 10px;
+      color: #888;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    .primary-button {
+      background: #2563eb;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .primary-button:hover {
+      background: #1d4ed8;
+    }
+    .button-icon {
+      flex-shrink: 0;
+    }
+    .collapsible-section {
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .collapsible-header:hover {
+      background: #e9ecef;
+    }
+    .collapsible-title {
+      font-size: 13px;
+      margin: 0;
+      color: #333;
+      font-weight: 600;
+    }
+    .collapse-icon {
+      transition: transform 0.3s ease;
+      color: #666;
+    }
+    .collapsible-content {
+      padding: 12px;
+      background: white;
+      max-height: 300px;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .collapsible-content.collapsed {
+      max-height: 0;
+      padding: 0 12px;
+    }
+    .collapse-icon.rotated {
+      transform: rotate(-90deg);
+    }
   </style>
 </head>
 <body>
@@ -82,6 +164,28 @@
   <!-- ChatGPT Section -->
   <div id="chatgpt-section" class="section hidden">
     <h2>ChatGPT Tools</h2>
+
+    <!-- Hashtag Navigation Setup (Collapsible) -->
+    <div class="collapsible-section">
+      <div class="collapsible-header" id="hashtagSetupToggle">
+        <h3 class="collapsible-title">Quick Navigation Setup</h3>
+        <svg class="collapse-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path class="chevron-down" d="M4.5 5.5L8 9L11.5 5.5L10.5 4.5L8 7L5.5 4.5L4.5 5.5Z"/>
+        </svg>
+      </div>
+      <div class="collapsible-content collapsed" id="hashtagSetupContent">
+        <p class="setup-description">Enable hashtag navigation by instructing ChatGPT to start responses with hashtags. This allows you to quickly jump between topics.</p>
+        <button id="enableHashtagsButton" class="primary-button">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" class="button-icon">
+            <path d="M8.5 3L7.5 7H3.5L3 9H7L6 13H2L1.5 15H5.5L4.5 19H6.5L7.5 15H11.5L10.5 19H12.5L13.5 15H17.5L18 13H14L15 9H19L19.5 7H15.5L16.5 3H14.5L13.5 7H9.5L10.5 3H8.5ZM9 9H13L12 13H8L9 9Z"/>
+          </svg>
+          Enable Hashtag Responses
+        </button>
+        <p class="setup-note">This will insert a prompt asking ChatGPT to prefix all responses with descriptive hashtags. You can adjust the prompt before sending it to ChatGPT.</p>
+      </div>
+    </div>
+
+    
     <p>Click on prompt to toggle response visibility.</p>
     <div class="button-grid">
       <button id="toggleDisplayButton">Show/hide all</button>

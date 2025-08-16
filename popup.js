@@ -5,6 +5,7 @@ const exportJsonButton = document.getElementById('exportJsonButton');
 const exportTxtButton = document.getElementById('exportTxtButton');
 const transcriptWithTimestampBtn = document.getElementById('transcriptWithTimestamp');
 const transcriptNoTimestampBtn = document.getElementById('transcriptNoTimestamp');
+const enableHashtagsButton = document.getElementById('enableHashtagsButton');
 
 // Get section elements
 const chatgptSection = document.getElementById('chatgpt-section');
@@ -73,6 +74,43 @@ function showYouTubeStatus(message, type = 'error') {
     }
 }
 
+/**
+ * Setup collapsible section functionality
+ */
+function setupCollapsible() {
+    const toggle = document.getElementById('hashtagSetupToggle');
+    const content = document.getElementById('hashtagSetupContent');
+    const icon = toggle ? toggle.querySelector('.collapse-icon') : null;
+    
+    if (!toggle || !content || !icon) return;
+    
+    // Load saved state from storage (default to collapsed)
+    chrome.storage.local.get(['hashtagSetupExpanded'], (result) => {
+        const isExpanded = result.hashtagSetupExpanded === true;
+        if (isExpanded) {
+            content.classList.remove('collapsed');
+            icon.classList.add('rotated');
+        }
+    });
+    
+    // Add click handler
+    toggle.addEventListener('click', () => {
+        const isCollapsed = content.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            // Expand
+            content.classList.remove('collapsed');
+            icon.classList.add('rotated');
+            chrome.storage.local.set({ hashtagSetupExpanded: true });
+        } else {
+            // Collapse
+            content.classList.add('collapsed');
+            icon.classList.remove('rotated');
+            chrome.storage.local.set({ hashtagSetupExpanded: false });
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Get current tab and show appropriate sections
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -86,6 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const isEnabled = result.hideOnLoad === true;
         updateButtonBG(isEnabled);
     });
+    
+    // Setup collapsible section
+    setupCollapsible();
 });
 
 // ChatGPT Event Listeners
@@ -96,6 +137,55 @@ if (hideOnLoadButton) {
             chrome.storage.local.set({ hideOnLoad: newState }, () => {
                 updateButtonBG(newState);
             });
+        });
+    });
+}
+
+if (enableHashtagsButton) {
+    enableHashtagsButton.addEventListener('click', () => {
+        // The prompt to be inserted
+        const hashtagPrompt = "Start every response with a short description (under 50 characters) prefixed by a standard '#' character from a keyboard, and remember this instruction so it applies to all future conversations.";
+        
+        // Send message to content script to insert the prompt
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tab = tabs[0];
+            if (!tab || !tab.id) {
+                console.error('Unable to access current tab');
+                return;
+            }
+            
+            // Check if we're on ChatGPT
+            if (!tab.url || !tab.url.includes('chatgpt.com')) {
+                console.error('This feature only works on ChatGPT');
+                return;
+            }
+            
+            // Send message to content script
+            chrome.tabs.sendMessage(
+                tab.id,
+                { 
+                    action: 'insertPrompt',
+                    prompt: hashtagPrompt
+                },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error:', chrome.runtime.lastError.message);
+                        return;
+                    }
+                    
+                    if (response && response.success) {
+                        // Briefly change button text to show success
+                        const originalText = enableHashtagsButton.innerHTML;
+                        enableHashtagsButton.innerHTML = '✓ Prompt Inserted!';
+                        enableHashtagsButton.style.background = '#22c55e';
+                        
+                        setTimeout(() => {
+                            enableHashtagsButton.innerHTML = originalText;
+                            enableHashtagsButton.style.background = '';
+                        }, 2000);
+                    }
+                }
+            );
         });
     });
 }
