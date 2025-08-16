@@ -1,54 +1,46 @@
-// chrome.commands.onCommand.addListener(command => {
-//     if (command === 'toggleDisplay') {
-//         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//             chrome.scripting.executeScript({
-//                 target: { tabId: tabs[0].id },
-//                 function: () => {
-//                     toggleDisplay();
-//                 }
-//             });
-//         });
-//     }
-// });
-
-// chrome.commands.onCommand.addListener((command) => {
-//     if (command === "toggleDisplay") {
-//         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//             const currentTab = tabs[0];
-//             if (currentTab && currentTab.id) {
-//                 chrome.tabs.sendMessage(currentTab.id, { action: 'toggleDisplay' });
-//             }
-//         });
-//     }
-// });
-
-
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//     console.log(2727272)
-//     if (changeInfo.url) {
-//         console.log('Tab URL changed to:', changeInfo.url);
-//         chrome.tabs.sendMessage(currentTab.id, { action: 'urlChanged' });
-//     }
-// });
-
-function handleUpdated(tabId, changeInfo, tabInfo) {
-    if (changeInfo.status === 'complete' && tab.url) {
-        chrome.tabs.sendMessage(tabId, { action: 'urlChanged' });
-      }
-    // if (changeInfo.url) {
-    //     console.log(`Tab: ${tabId} URL changed to ${changeInfo.url}`);
-    //     chrome.tabs.sendMessage(tabId, { action: 'urlChanged' });
-    // }
-}
-
-// chrome.tabs.onUpdated.addListener(handleUpdated);
-
-chrome.runtime.onInstalled.addListener(() => {
-    console.log("Extension installed or updated");
+// Handle keyboard shortcut commands
+chrome.commands.onCommand.addListener((command) => {
+    if (command === "toggleDisplay") {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const currentTab = tabs[0];
+            // Only send to ChatGPT tabs
+            if (currentTab && currentTab.id && currentTab.url && currentTab.url.includes('chatgpt.com')) {
+                chrome.tabs.sendMessage(currentTab.id, { action: 'toggleDisplay' });
+            }
+        });
+    }
 });
 
+// Handle tab updates for SPA navigation
+function handleUpdated(tabId, changeInfo, tab) {
+    if (changeInfo.status === 'complete' && tab.url) {
+        // Only send to ChatGPT tabs for hide on load functionality
+        if (tab.url.includes('chatgpt.com')) {
+            chrome.tabs.sendMessage(tabId, { action: 'urlChanged' });
+        }
+    }
+}
 
-// chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
-//     console.log("URL changed (SPA navigation):", details.url);
-//     chrome.tabs.sendMessage(details.tabId, { action: "urlChanged" });
-//   });
+chrome.tabs.onUpdated.addListener(handleUpdated);
+
+chrome.runtime.onInstalled.addListener(() => {
+    console.log("ScrollLess Extension installed or updated");
+    // Set default values
+    chrome.storage.local.get(['hideOnLoad', 'onDisplay'], (result) => {
+        if (result.hideOnLoad === undefined) {
+            chrome.storage.local.set({ hideOnLoad: false });
+        }
+        if (result.onDisplay === undefined) {
+            chrome.storage.local.set({ onDisplay: true });
+        }
+    });
+});
+
+// Handle SPA navigation for ChatGPT
+chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
+    if (details.url && details.url.includes('chatgpt.com')) {
+        chrome.tabs.sendMessage(details.tabId, { action: "urlChanged" });
+    }
+}, {
+    url: [{hostContains: 'chatgpt.com'}]
+});

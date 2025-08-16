@@ -2,27 +2,42 @@
     "manifest_version": 3,
     "name": "ScrollLess",
     "version": "0.3",
-    "description": "Hide ChatGPT responses with a click and browse your prompts faster.",
+    "description": "Hide ChatGPT responses with a click and browse your prompts faster. Extract YouTube transcripts.",
     "permissions": [
         "activeTab",
         "scripting",
         "storage",
-        "tabs"
+        "tabs",
+        "webNavigation"
     ],
-    "host_permissions": ["https://chatgpt.com/*"],
+    "host_permissions": [
+        "https://chatgpt.com/*",
+        "https://www.youtube.com/*",
+        "https://youtube.com/*"
+    ],
     "background": {
         "service_worker": "background.js"
     },
     "content_scripts": [
         {
-        "matches": ["https://chatgpt.com/*"],
-        "js": ["content.js"],
-        "run_at": "document_end"
+            "matches": ["https://chatgpt.com/*"],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://www.youtube.com/*",
+                "https://youtube.com/*"
+            ],
+            "js": ["youtube-content.js"],
+            "run_at": "document_end"
         }
     ],
     "externally_connectable": {
         "matches": [
-            "https://chatgpt.com/*"
+            "https://chatgpt.com/*",
+            "https://www.youtube.com/*",
+            "https://youtube.com/*"
         ]
     },
     "action": {

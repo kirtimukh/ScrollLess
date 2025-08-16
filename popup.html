@@ -5,16 +5,109 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScrollLess</title>
+  <style>
+    body {
+      width: 250px;
+      padding: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 5px;
+    }
+    .section h2 {
+      font-size: 14px;
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .section p {
+      font-size: 12px;
+      margin: 5px 0;
+      color: #666;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .button-grid {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .button-grid button {
+      flex: 1 1 48%;
+    }
+    #hideOnLoadButton {
+      background-color: lightgrey;
+    }
+    #hideOnLoadButton.enabled {
+      background-color: greenyellow;
+      color: #333;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .error-message {
+      color: #d32f2f;
+      font-size: 12px;
+      margin-top: 10px;
+      padding: 8px;
+      background: #ffebee;
+      border-radius: 4px;
+    }
+  </style>
 </head>
-<body style="width: 220px">
+<body>
   <h1>ScrollLess</h1>
-  <p>Click on prompt to toggle response visibility.<br>Use <code>Ctrl+Shift+Y</code> for all responses.</p>
-  <div style="display:flex; gap: 4px; flex-wrap: wrap;">
-    <button id="toggleDisplayButton" style="flex: 1 1 48%">Show/hide all</button>
-    <button id="hideOnLoadButton" style="flex: 1 1 48%">Hide on load</button>
-    <button id="exportTxtButton" style="flex: 1 1 48%">Export TXT</button>
-    <button id="exportJsonButton" style="flex: 1 1 48%">Export JSON</button>
+  
+  <!-- ChatGPT Section -->
+  <div id="chatgpt-section" class="section hidden">
+    <h2>ChatGPT Tools</h2>
+    <p>Click on prompt to toggle response visibility.<br>Use <code>Ctrl+Shift+Y</code> for all responses.</p>
+    <div class="button-grid">
+      <button id="toggleDisplayButton">Show/hide all</button>
+      <button id="hideOnLoadButton">Hide on load</button>
+      <button id="exportTxtButton">Export TXT</button>
+      <button id="exportJsonButton">Export JSON</button>
+    </div>
   </div>
+  
+  <!-- YouTube Section -->
+  <div id="youtube-section" class="section hidden">
+    <h2>YouTube Transcript</h2>
+    <p>Extract English transcript from the current video:</p>
+    <div class="button-grid">
+      <button id="transcriptWithTimestamp">With Timestamp</button>
+      <button id="transcriptNoTimestamp">No Timestamp</button>
+    </div>
+    <div id="youtube-status" class="error-message hidden"></div>
+  </div>
+  
+  <!-- Default Section for other websites -->
+  <div id="default-section" class="section hidden">
+    <p>This extension works on ChatGPT and YouTube.</p>
+    <p style="margin-top: 10px; font-size: 11px;">Visit <strong>chatgpt.com</strong> to use ChatGPT tools or <strong>youtube.com</strong> to extract video transcripts.</p>
+  </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>

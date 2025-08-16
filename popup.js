@@ -1,35 +1,187 @@
+// Get all button elements
 const hideOnLoadButton = document.getElementById('hideOnLoadButton');
 const toggleDisplayButton = document.getElementById('toggleDisplayButton');
 const exportJsonButton = document.getElementById('exportJsonButton');
 const exportTxtButton = document.getElementById('exportTxtButton');
+const transcriptWithTimestampBtn = document.getElementById('transcriptWithTimestamp');
+const transcriptNoTimestampBtn = document.getElementById('transcriptNoTimestamp');
+
+// Get section elements
+const chatgptSection = document.getElementById('chatgpt-section');
+const youtubeSection = document.getElementById('youtube-section');
+const defaultSection = document.getElementById('default-section');
+const youtubeStatus = document.getElementById('youtube-status');
 
 function updateButtonBG(isEnabled) {
-    hideOnLoadButton.style.backgroundColor = isEnabled ? "greenyellow" : "lightgrey";
+    if (hideOnLoadButton) {
+        hideOnLoadButton.classList.toggle('enabled', isEnabled);
+    }
+}
+
+/**
+ * Show appropriate section based on current tab URL
+ */
+function showAppropriateSections(url) {
+    // Hide all sections initially
+    chatgptSection.classList.add('hidden');
+    youtubeSection.classList.add('hidden');
+    defaultSection.classList.add('hidden');
+    
+    if (!url) {
+        defaultSection.classList.remove('hidden');
+        return;
+    }
+    
+    // Check if it's ChatGPT
+    if (url.includes('chatgpt.com')) {
+        chatgptSection.classList.remove('hidden');
+    }
+    // Check if it's YouTube
+    else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        youtubeSection.classList.remove('hidden');
+        // Check if we're on a video page
+        if (!url.includes('/watch?v=')) {
+            showYouTubeStatus('Please navigate to a video to extract transcript', 'error');
+        }
+    }
+    // Show default for other sites
+    else {
+        defaultSection.classList.remove('hidden');
+    }
+}
+
+/**
+ * Show status message in YouTube section
+ */
+function showYouTubeStatus(message, type = 'error') {
+    youtubeStatus.textContent = message;
+    youtubeStatus.classList.remove('hidden');
+    
+    if (type === 'success') {
+        youtubeStatus.style.background = '#e8f5e9';
+        youtubeStatus.style.color = '#2e7d32';
+    } else {
+        youtubeStatus.style.background = '#ffebee';
+        youtubeStatus.style.color = '#d32f2f';
+    }
+    
+    // Auto-hide success messages after 3 seconds
+    if (type === 'success') {
+        setTimeout(() => {
+            youtubeStatus.classList.add('hidden');
+        }, 3000);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Get current tab and show appropriate sections
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+            showAppropriateSections(tabs[0].url);
+        }
+    });
+    
+    // Initialize ChatGPT hide on load button state
     chrome.storage.local.get(['hideOnLoad'], (result) => {
         const isEnabled = result.hideOnLoad === true;
         updateButtonBG(isEnabled);
     });
 });
 
-hideOnLoadButton.addEventListener('click', () => {
-    chrome.storage.local.get(['hideOnLoad'], (result) => {
-        const newState = !(result.hideOnLoad === true);
-        chrome.storage.local.set({ hideOnLoad: newState }, () => {
-            updateButtonBG(newState);
+// ChatGPT Event Listeners
+if (hideOnLoadButton) {
+    hideOnLoadButton.addEventListener('click', () => {
+        chrome.storage.local.get(['hideOnLoad'], (result) => {
+            const newState = !(result.hideOnLoad === true);
+            chrome.storage.local.set({ hideOnLoad: newState }, () => {
+                updateButtonBG(newState);
+            });
         });
     });
-});
+}
 
-toggleDisplayButton.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true })
-    .then(tabs => {
-        const currentTab = tabs[0];
-        chrome.tabs.sendMessage(currentTab.id, { action: 'toggleDisplay' })
+if (toggleDisplayButton) {
+    toggleDisplayButton.addEventListener('click', () => {
+        chrome.tabs.query({ active: true, lastFocusedWindow: true })
+        .then(tabs => {
+            const currentTab = tabs[0];
+            chrome.tabs.sendMessage(currentTab.id, { action: 'toggleDisplay' })
+        });
     });
-});
+}
+
+// YouTube Event Listeners
+if (transcriptWithTimestampBtn) {
+    transcriptWithTimestampBtn.addEventListener('click', () => {
+        extractYouTubeTranscript(true);
+    });
+}
+
+if (transcriptNoTimestampBtn) {
+    transcriptNoTimestampBtn.addEventListener('click', () => {
+        extractYouTubeTranscript(false);
+    });
+}
+
+/**
+ * Extract YouTube transcript
+ */
+function extractYouTubeTranscript(includeTimestamps) {
+    // Hide any previous status messages
+    youtubeStatus.classList.add('hidden');
+    
+    // Disable buttons during extraction
+    transcriptWithTimestampBtn.disabled = true;
+    transcriptNoTimestampBtn.disabled = true;
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = tabs[0];
+        if (!tab || !tab.id) {
+            showYouTubeStatus('Unable to access current tab', 'error');
+            transcriptWithTimestampBtn.disabled = false;
+            transcriptNoTimestampBtn.disabled = false;
+            return;
+        }
+        
+        // Check if we're on a YouTube video page
+        if (!tab.url || !tab.url.includes('/watch?v=')) {
+            showYouTubeStatus('Please navigate to a YouTube video first', 'error');
+            transcriptWithTimestampBtn.disabled = false;
+            transcriptNoTimestampBtn.disabled = false;
+            return;
+        }
+        
+        // Send message to content script
+        chrome.tabs.sendMessage(
+            tab.id, 
+            { 
+                action: 'extractTranscript', 
+                includeTimestamps: includeTimestamps 
+            }, 
+            (response) => {
+                // Re-enable buttons
+                transcriptWithTimestampBtn.disabled = false;
+                transcriptNoTimestampBtn.disabled = false;
+                
+                if (chrome.runtime.lastError) {
+                    showYouTubeStatus('Error: ' + chrome.runtime.lastError.message, 'error');
+                    return;
+                }
+                
+                if (!response) {
+                    showYouTubeStatus('No response from page. Please refresh and try again.', 'error');
+                    return;
+                }
+                
+                if (response.success) {
+                    showYouTubeStatus('Transcript extracted successfully!', 'success');
+                } else {
+                    showYouTubeStatus('Error: ' + (response.error || 'Unknown error'), 'error');
+                }
+            }
+        );
+    });
+}
 
 function downloadJson(obj, filename) {
     const json = JSON.stringify(obj, null, 2);
@@ -44,7 +196,8 @@ function downloadJson(obj, filename) {
     URL.revokeObjectURL(url);
 }
 
-exportJsonButton.addEventListener('click', () => {
+if (exportJsonButton) {
+    exportJsonButton.addEventListener('click', () => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
         const tab = tabs[0];
         if (!tab || !tab.id) return;
@@ -65,7 +218,8 @@ exportJsonButton.addEventListener('click', () => {
             downloadJson(data, `${safeTitle}_${timestamp}.json`);
         });
     });
-});
+    });
+}
 
 function downloadTxt(text, filename) {
     const blob = new Blob([text], { type: 'text/plain' });
@@ -99,7 +253,8 @@ function toPlainText(data) {
     return lines.join('\n');
 }
 
-exportTxtButton.addEventListener('click', () => {
+if (exportTxtButton) {
+    exportTxtButton.addEventListener('click', () => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }).then(tabs => {
         const tab = tabs[0];
         if (!tab || !tab.id) return;
@@ -121,4 +276,5 @@ exportTxtButton.addEventListener('click', () => {
             downloadTxt(text, `${safeTitle}_${timestamp}.txt`);
         });
     });
-});
+    });
+}
