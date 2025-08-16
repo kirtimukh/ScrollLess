@@ -4,6 +4,7 @@ A simple chrome extension that
 1. in ChatGPT
     - Show/hide responses
     - Downloads the conversation in `.json` or `.txt` format
+    - **NEW:** Hashtag navigation - automatically detects hashtags in conversations and provides a navigation panel for quick jumping
 2. in YouTube
     - Downloads the english transcript with[out] timestamps
 
