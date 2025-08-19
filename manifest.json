@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "ScrollLess",
-    "version": "0.4",
+    "version": "0.5",
     "description": "Hide ChatGPT responses with a click and browse your prompts faster. Extract YouTube transcripts.",
     "permissions": [
         "activeTab",

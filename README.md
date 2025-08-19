@@ -8,7 +8,7 @@ A simple chrome extension that
 2. in YouTube
     - Downloads the english transcript with[out] timestamps
 
-[![Demo video](Link to demo)](https://github.com/user-attachments/assets/6431a1fe-273e-47cc-bc29-ea4a9a2f73a8)
+[![Demo video](Link to demo)](https://github.com/user-attachments/assets/3680a817-cdd7-4296-957c-0a3c29d8701a)
 
 
 ## Adding to Chrome or Brave
